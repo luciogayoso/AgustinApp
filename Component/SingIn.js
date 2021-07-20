@@ -121,7 +121,7 @@ const Momentos = () => {
 
   return (
     <View style={style.conteiner}>
-      <View style={{ marginn: 30, height: 60, marginTop: 30 }}>
+      <View style={{ marginn: 30, height: 60 }}>
         <Nav title="Momentos" />
       </View>
       {registro ? (

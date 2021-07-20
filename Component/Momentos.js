@@ -1,73 +1,90 @@
-import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, FlatList, TouchableHighlight } from 'react-native';
+import React, { useState } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableHighlight,
+  StatusBar,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { useSelector } from "react-redux";
+import { useFirestoreConnect } from "react-redux-firebase";
 import Nav from "./Nav.js";
 
 const Momentos = () => {
+  useFirestoreConnect([{ collection: "Category" }]);
 
-  const style = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#fff",
-      alignItems: "center",
-      justifyContent: "center",
-      width: '80%',
-    },
-    separator: {
-      margin: 5,
-    },
-    txt: {
-      fontSize: 15,
-      paddingTop: 20,
-      textAlign: 'center',
-    },
-    txtTitle: {
-      fontSize: 20,
-      margin: 20,
-    },
-    viewList: {
-      backgroundColor: '#7CDCC1',
-      height: 70,
-      borderWidth: 1,
-      borderColor: 'black',
-      borderRadius: 30,
-      textAlign: 'center',
-      marginLeft: 10,
-      marginRight: 10,
-    },
-  });
+  const category = useSelector(
+    ({ firestore: { ordered } }) => ordered.Category
+  );
+
   return (
     <View style={style.conteiner}>
-      <View style={{ marginn: 30, height: 60, marginTop: 30 }}>
-        <Nav title='Momentos' />
+      <View style={{ marginBottom: 30, height: 60 }}>
+        <Nav title="Momentos" />
       </View>
+
       <Text style={style.txtTitle}>Selecciona tus Momentos</Text>
       <FlatList
         ItemSeparatorComponent={
-          'android' &&
+          "android" &&
           (({ highlighted }) => (
-            <View
-              style={[
-                style.separator,
-                highlighted && { marginLeft: 0 }
-              ]}
-            />
+            <View style={[style.separator, highlighted && { marginLeft: 0 }]} />
           ))
         }
-        data={[{ title: 'Mi primer dia', key: 'item1' }, { title: 'Dias con papas', key: 'item2' }, { title: 'Mi primer mes', key: 'item3' }, { title: 'Los mejores Momentos', key: 'item4' }, { title: 'Mi primer año', key: 'item5' }]}
-        renderItem={({ item, index, separators }) => (
+        contentContainerStyle={{
+          height: 450,
+        }}
+        data={category}
+        renderItem={({ item }) => (
           <TouchableHighlight
-            key={item.key}
-            onPress={() => this._onPress(item)}
-            onShowUnderlay={separators.highlight}
-            onHideUnderlay={separators.unhighlight}>
+            key={item.id}
+            onPress={() => alert("Soy un boton")}
+          >
             <View style={style.viewList}>
               <Text style={style.txt}>{item.title}</Text>
             </View>
           </TouchableHighlight>
         )}
+        keyExtractor={(item) => item.id}
       />
     </View>
-  )
+  );
 };
+
+const style = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "80%",
+  },
+  separator: {
+    margin: 5,
+  },
+  txt: {
+    fontSize: 15,
+    paddingTop: 20,
+    paddingBottom: 20,
+    textAlign: "center",
+  },
+  txtTitle: {
+    fontSize: 20,
+    margin: 20,
+  },
+  viewList: {
+    backgroundColor: "#7CDCC1",
+    borderWidth: 1,
+    borderColor: "black",
+    borderRadius: 30,
+    textAlign: "center",
+    marginLeft: 10,
+    marginRight: 10,
+  },
+});
 
 export default Momentos;

@@ -1,10 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Button, SafeAreaView, ScrollView, StatusBar, TextInput, Picker, Text, View, TouchableOpacity, Image, Modal, TouchableHighlight } from 'react-native';
-import firebase from './firebaseconfig/Firebase';
-import 'firebase/auth';
-import Nav from './Nav';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Camera } from 'expo-camera';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  StyleSheet,
+  Button,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  TextInput,
+  Picker,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  Modal,
+  TouchableHighlight,
+} from "react-native";
+import firebase from "./firebaseconfig/Firebase";
+import "firebase/auth";
+import { useSelector } from "react-redux";
+import { useFirestoreConnect } from "react-redux-firebase";
+import Nav from "./Nav";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { Camera } from "expo-camera";
+import { useFirestore } from "react-redux-firebase";
 
 const Takephoto = () => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -14,8 +31,15 @@ const Takephoto = () => {
   const [selectedValue, setSelectedValue] = useState();
   const [text, onChangeText] = useState();
 
-  firebase.auth().onAuthStateChanged(user => {
-  })
+  //firebase.auth().onAuthStateChanged((user) => {});
+
+  useFirestoreConnect([{ collection: "Category" }]);
+
+  const category = useSelector(
+    ({ firestore: { ordered } }) => ordered.Category
+  );
+
+  const firestore = useFirestore();
 
   const cam = useRef();
 
@@ -29,12 +53,12 @@ const Takephoto = () => {
         cam.current.resumePreview();
       }
     }
-  }
+  };
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
+      setHasPermission(status === "granted");
     })();
   }, []);
 
@@ -45,32 +69,43 @@ const Takephoto = () => {
     return <Text>No access to camera</Text>;
   }
 
+  const addMoment = () => {
+    alert("funciono");
+  };
+
   return (
     <>
-      <View style={{ marginn: 30, height: 60, marginTop: 30 }}>
-        <Nav title='Capturar Momento' />
+      <View style={{ height: 60 }}>
+        <Nav title="Capturar Momento" />
       </View>
-      {modalVisible ?
+      {modalVisible ? (
         <SafeAreaView style={styles.centeredView}>
           <ScrollView style={styles.scrollView}>
-            <Text style={{ fontSize: 18, marginBottom: 20, textAlign: 'center', }}>Seleccione un tipo de momento</Text>
+            <Text
+              style={{ fontSize: 18, marginBottom: 20, textAlign: "center" }}
+            >
+              Seleccione un tipo de momento
+            </Text>
             <Picker
               selectedValue={selectedValue}
               style={styles.Picker}
               enabled={true}
               prompt="Selecciona el tipo de momentos"
-              onValueChange={(itemValue, itemIndex) => setSelectedValue(itemValue)}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedValue(itemValue)
+              }
             >
-              <Picker.Item label="Mi primer dia" value="Mi primer dia" />
-              <Picker.Item label="Dias con mis papis" value="Dias con mis papis" />
-              <Picker.Item label="Mi primer mes" value="Mi primer mes" />
-              <Picker.Item label="Los mejores Momentos" value="Los mejores Momentos" />
-              <Picker.Item label="Mi primer año" value="Mi primer año" />
+              {category.map((item) => {
+                return (
+                  <Picker.Item
+                    label={item.title}
+                    value={item.title}
+                    key={item.id}
+                  />
+                );
+              })}
             </Picker>
-            <Image
-              style={styles.image}
-              source={{ uri }}
-            />
+            <Image style={styles.image} source={{ uri }} />
             <TextInput
               style={styles.input}
               onChangeText={onChangeText}
@@ -82,11 +117,12 @@ const Takephoto = () => {
                 style={styles.closeButton}
                 onPress={() => {
                   setModalVisible(false);
-                }}>
+                }}
+              >
                 <Icon name="delete" color="#848484" size={40} />
               </TouchableHighlight>
               <Button
-                onPress={() => alert('funciono')}
+                onPress={() => addMoment()}
                 title="Guardar"
                 color="#4489EB"
                 accessibilityLabel="Guardar el momento capturado"
@@ -94,11 +130,10 @@ const Takephoto = () => {
             </View>
           </ScrollView>
         </SafeAreaView>
-        :
+      ) : (
         <View style={styles.container}>
           <Camera ref={cam} style={styles.camera} type={type}>
             <View style={styles.buttonContainer}>
-
               <View style={styles.button}>
                 <TouchableOpacity
                   onPress={() => {
@@ -107,45 +142,43 @@ const Takephoto = () => {
                         ? Camera.Constants.Type.front
                         : Camera.Constants.Type.back
                     );
-                  }}>
+                  }}
+                >
                   <Icon name="rotate-left" color="white" size={50} />
                 </TouchableOpacity>
               </View>
 
               <View style={styles.buttonTake}>
-                <TouchableOpacity
-                  onPress={() => _takePicture()}>
+                <TouchableOpacity onPress={() => _takePicture()}>
                   <Icon name="camera" color="#7CDCC1" size={80} />
                 </TouchableOpacity>
               </View>
 
               <View style={styles.buttonTakePhoto}>
-                {
-                  uri ?
-                    <TouchableOpacity
-                      onPress={() => {
-                        setModalVisible(true);
-                      }}>
-                      <Image
-                        style={{ width: 100, height: 100 }}
-                        source={{ uri: uri }}
-                      />
-                    </TouchableOpacity >
-                    : null
-                }
+                {uri ? (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setModalVisible(true);
+                    }}
+                  >
+                    <Image
+                      style={{ width: 100, height: 100 }}
+                      source={{ uri: uri }}
+                    />
+                  </TouchableOpacity>
+                ) : null}
               </View>
-
             </View>
           </Camera>
         </View>
-      }
+      )}
     </>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    width: "100%",
     flex: 1,
   },
   camera: {
@@ -153,79 +186,79 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: 'transparent',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "transparent",
     margin: 20,
   },
   button: {
-    alignSelf: 'flex-end',
-    alignItems: 'flex-start',
+    alignSelf: "flex-end",
+    alignItems: "flex-start",
   },
   buttonTake: {
-    alignSelf: 'flex-end',
-    alignItems: 'center',
+    alignSelf: "flex-end",
+    alignItems: "center",
   },
   buttonTakePhoto: {
-    alignSelf: 'flex-end',
-    alignItems: 'center',
+    alignSelf: "flex-end",
+    alignItems: "center",
     width: 70,
   },
   text: {
     fontSize: 18,
-    color: 'white',
+    color: "white",
   },
   centeredView: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
     flexDirection: "column",
     justifyContent: "space-around",
-    marginTop: 10
+    marginTop: 10,
   },
   closeButton: {
     width: 40,
     height: 40,
     marginRight: 30,
-    alignSelf: 'flex-end',
-    alignItems: 'flex-start',
+    alignSelf: "flex-end",
+    alignItems: "flex-start",
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 500,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   Picker: {
-    width: '80%',
+    width: "80%",
     height: 40,
-    alignSelf: 'center',
+    alignSelf: "center",
     borderWidth: 2,
-    borderColor: 'black',
+    borderColor: "black",
     marginBottom: 20,
   },
   input: {
-    width: '80%',
+    width: "80%",
     height: 40,
     paddingLeft: 10,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginTop: 20,
   },
   buttonSave: {
-    display: 'flex',
-    flexDirection: 'row',
+    display: "flex",
+    flexDirection: "row",
     width: 200,
     height: 40,
     paddingLeft: 10,
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     margin: 20,
   },
   modalView: {
-    width: '100%',
+    width: "100%",
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -235,13 +268,13 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   modalText: {
     marginBottom: 15,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
 
