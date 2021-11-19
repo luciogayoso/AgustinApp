@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import firebase from "./firebaseconfig/Firebase";
+import firebase from "firebase/app";
 import "firebase/auth";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import TakePhotoScreen from "./Takephoto";
@@ -16,6 +16,7 @@ const ScreenStack = () => {
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user) => {
+      console.log(user.v.src.providerData[0]);
       setConnect(true);
     });
   }, []);

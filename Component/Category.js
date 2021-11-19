@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import firebase from "./firebaseconfig/Firebase";
+import firebase from "firebase/app";
 import "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import Nav from "./Nav";
