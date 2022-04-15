@@ -47,6 +47,7 @@ const Takephoto = () => {
     if (cam.current) {
       const option = { quality: 0.5, base64: true, skipProcessing: true };
       const picture = await cam.current.takePictureAsync(option);
+      console.dir(picture);
       const source = picture.uri;
       setUri(source);
       if (source) {
