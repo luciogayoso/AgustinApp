@@ -22,10 +22,9 @@ const Momentos = () => {
   const SingIn = () => {
     if (Email !== undefined && Clave !== undefined) {
       if (Clave.length > 6) {
-        alert("La clave debe tener mas de 6 caracteres");
         firebase
           .auth()
-          .signInWithEmailAndPassword(email, password)
+          .signInWithEmailAndPassword(Email, Clave)
           .then((userCredential) => {
             // Signed in
             var user = userCredential.user;

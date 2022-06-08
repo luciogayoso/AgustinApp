@@ -11,10 +11,9 @@ import {
   View,
   TouchableOpacity,
   Image,
-  Modal,
   TouchableHighlight,
 } from "react-native";
-import firebase from "./firebaseconfig/Firebase";
+import { useNavigation } from "@react-navigation/native";
 import "firebase/auth";
 import { useSelector } from "react-redux";
 import { useFirestoreConnect } from "react-redux-firebase";
@@ -29,16 +28,17 @@ const Takephoto = () => {
   const [uri, setUri] = useState();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedValue, setSelectedValue] = useState();
+  const [selectedIndexValue, setSelectedIndexValue] = useState();
   const [text, onChangeText] = useState();
 
-  //firebase.auth().onAuthStateChanged((user) => {});
-
   useFirestoreConnect([{ collection: "Category" }]);
+  useFirestoreConnect([{ collection: "Momentos" }]);
 
   const category = useSelector(
     ({ firestore: { ordered } }) => ordered.Category
   );
 
+  const navigation = useNavigation();
   const firestore = useFirestore();
 
   const cam = useRef();
@@ -47,7 +47,6 @@ const Takephoto = () => {
     if (cam.current) {
       const option = { quality: 0.5, base64: true, skipProcessing: true };
       const picture = await cam.current.takePictureAsync(option);
-      console.dir(picture);
       const source = picture.uri;
       setUri(source);
       if (source) {
@@ -71,7 +70,19 @@ const Takephoto = () => {
   }
 
   const addMoment = () => {
-    alert("funciono");
+    const newMomento = {
+      user: category[selectedIndexValue].uid,
+      categoria: category[selectedIndexValue].title,
+      uriImg: uri,
+      descricion: text,
+    };
+    setUri("");
+    setSelectedIndexValue(0);
+    setSelectedValue("");
+    onChangeText("");
+    setModalVisible(false);
+    navigation.navigate("Momentos");
+    return firestore.collection("momentos").add(newMomento);
   };
 
   return (
@@ -92,9 +103,10 @@ const Takephoto = () => {
               style={styles.Picker}
               enabled={true}
               prompt="Selecciona el tipo de momentos"
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedValue(itemValue)
-              }
+              onValueChange={(itemValue, itemIndex) => {
+                setSelectedValue(itemValue);
+                setSelectedIndexValue(itemIndex);
+              }}
             >
               {category.map((item) => {
                 return (
@@ -109,7 +121,7 @@ const Takephoto = () => {
             <Image style={styles.image} source={{ uri }} />
             <TextInput
               style={styles.input}
-              onChangeText={onChangeText}
+              onChangeText={() => onChangeText}
               value={text}
               placeholder="Escriba una descripcion"
             />

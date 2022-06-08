@@ -7,6 +7,7 @@ import MisMomentosScreen from "./MisMomentos";
 import MomentosScreen from "./Momentos";
 import CategoriaScren from "./Category";
 import SingInScreen from "./SingIn";
+import subirFotoScreen from "./subirFotoScreen";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
 const Stack = createBottomTabNavigator(); //Es una funcion que basicamente maneja  la conexion entre pantallas.
@@ -62,6 +63,17 @@ const ScreenStack = () => {
             component={TakePhotoScreen}
             options={{
               tabBarLabel: "Tomar Momentos",
+              tabBarIcon: () => (
+                <Icon name="camera" color="#7CDCC1" size={24} />
+              ),
+            }}
+          />
+
+          <Stack.Screen
+            name="subirMomentos"
+            component={subirFotoScreen}
+            options={{
+              tabBarLabel: "Subir Momentos",
               tabBarIcon: () => (
                 <Icon name="camera" color="#7CDCC1" size={24} />
               ),
